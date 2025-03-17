@@ -5,11 +5,10 @@ let mainWindow, isQuiting, tray;
 
 app.on('before-quit', function () {
     isQuiting = true;
-    tray.destroy();
   });
 
 app.whenReady().then(() => {
-    tray = new Tray(path.join(__dirname, 'tomato.png'));
+    tray = new Tray(path.join(__dirname, 'assets/tomato.png'));
 
     tray.setContextMenu(Menu.buildFromTemplate([
         {
@@ -19,7 +18,7 @@ app.whenReady().then(() => {
         },
         {
             label: 'Quit', click: function () {
-                isQuiting = true;
+                tray.destroy();
                 app.quit();
             }
         }
@@ -31,11 +30,12 @@ app.whenReady().then(() => {
 
     mainWindow = new BrowserWindow({
         width: 400,
-        height: 350,
+        height: 375,
         autoHideMenuBar: true,
         resizable: false,        
         webPreferences: {
-        nodeIntegration: true,
+            nodeIntegration: true,
+            contextIsolation: false
         },
     });
 
@@ -47,11 +47,10 @@ app.whenReady().then(() => {
     });
 
     mainWindow.on('close', function (event) {
-        if(!isQuiting){
-            event.preventDefault();
-            mainWindow.hide();
-            event.returnValue = false;
-        }    
+        if(!isQuiting){            
+            tray.destroy();
+            app.quit();
+        }
         return false;
     });
 
@@ -63,7 +62,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
+    if (process.platform !== "darwin") {        
         app.quit();
     }
 });
